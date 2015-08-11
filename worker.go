@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -28,10 +29,13 @@ func (w *worker) work(messages chan *Msg) {
 			w.startedAt = time.Now().UTC().Unix()
 			w.currentMsg = message
 
+			fmt.Println("[work] work:", message)
+			t1 := time.Now().UnixNano()
 			if w.process(message) {
 				w.manager.confirm <- message
 			}
-
+			t2 := time.Now().UnixNano()
+			fmt.Println("[work] work cost: ", float64(t2-t1)/float64(1e6))
 			w.startedAt = 0
 			w.currentMsg = nil
 		case w.manager.fetch.Ready() <- true:
