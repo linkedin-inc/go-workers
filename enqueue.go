@@ -19,6 +19,8 @@ type EnqueueData struct {
 	Jid        string      `json:"jid"`
 	EnqueuedAt float64     `json:"enqueued_at"`
 	EnqueueOptions
+	RetryCount int32 `json:"retry_count"`
+	Retry      bool  `json:"retry"`
 }
 
 type EnqueueOptions struct {
@@ -58,6 +60,8 @@ func EnqueueWithOptions(queue, class string, args interface{}, opts EnqueueOptio
 		Jid:            generateJid(),
 		EnqueuedAt:     now,
 		EnqueueOptions: opts,
+		Retry:          true,
+		RetryCount:     3,
 	}
 
 	bytes, err := json.Marshal(data)
