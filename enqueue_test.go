@@ -73,14 +73,14 @@ func EnqueueSpec(c gospec.Context) {
 		})
 
 		c.Specify("has retry and retry_count when set", func() {
-			EnqueueWithOptions("enqueue6", "Compare", []string{"foo", "bar"}, EnqueueOptions{RetryCount: 13, Retry: true})
+			EnqueueWithOptions("enqueue6", "Compare", []string{"foo", "bar"}, EnqueueOptions{RetryCount: 1, Retry: 3})
 
 			bytes, _ := redis.Bytes(conn.Do("lpop", "prod:queue:enqueue6"))
 			var result map[string]interface{}
 			json.Unmarshal(bytes, &result)
 			c.Expect(result["class"], Equals, "Compare")
 
-			retry := result["retry"].(bool)
+			retry := result["retry"].(int)
 			c.Expect(retry, Equals, true)
 
 			retryCount := int(result["retry_count"].(float64))

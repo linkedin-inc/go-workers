@@ -19,13 +19,11 @@ type EnqueueData struct {
 	Jid        string      `json:"jid"`
 	EnqueuedAt float64     `json:"enqueued_at"`
 	EnqueueOptions
-	RetryCount int32 `json:"retry_count"`
-	Retry      bool  `json:"retry"`
 }
 
 type EnqueueOptions struct {
 	RetryCount int     `json:"retry_count,omitempty"`
-	Retry      bool    `json:"retry,omitempty"`
+	Retry      int     `json:"retry,omitempty"` // max retry count
 	At         float64 `json:"at,omitempty"`
 }
 
@@ -51,6 +49,18 @@ func EnqueueAt(queue, class string, at time.Time, args interface{}) (string, err
 	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: timeToSecondsWithNanoPrecision(at)})
 }
 
+func EnqueueWithRetry(queue, class string, args interface{}, maxRetry int) (string, error) {
+	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: nowToSecondsWithNanoPrecision(), Retry: maxRetry})
+}
+
+func EnqueueInWithRetry(queue, class string, in float64, args interface{}, maxRetry int) (string, error) {
+	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: nowToSecondsWithNanoPrecision() + in, Retry: maxRetry})
+}
+
+func EnqueueAtWithRetry(queue, class string, at time.Time, args interface{}, maxRetry int) (string, error) {
+	return EnqueueWithOptions(queue, class, args, EnqueueOptions{At: timeToSecondsWithNanoPrecision(at), Retry: maxRetry})
+}
+
 func EnqueueWithOptions(queue, class string, args interface{}, opts EnqueueOptions) (string, error) {
 	now := nowToSecondsWithNanoPrecision()
 	data := EnqueueData{
@@ -60,8 +70,6 @@ func EnqueueWithOptions(queue, class string, args interface{}, opts EnqueueOptio
 		Jid:            generateJid(),
 		EnqueuedAt:     now,
 		EnqueueOptions: opts,
-		Retry:          true,
-		RetryCount:     3,
 	}
 
 	bytes, err := json.Marshal(data)

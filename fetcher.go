@@ -45,11 +45,11 @@ func (f *fetch) processOldMessages() {
 	messages := f.inprogressMessages()
 
 	for _, message := range messages {
-		//		t1 := time.Now().UnixNano()
-		//		Logger.Println("[processOldMessages] fetch:", message)
+		//t1 := time.Now().UnixNano()
+		//Logger.Println("[processOldMessages] fetch:", message)
 		<-f.Ready()
-		//		t2 := time.Now().UnixNano()
-		//		Logger.Println("[processOldMessages] fetch cost: ", float64(t2-t1)/float64(1e6))
+		//t2 := time.Now().UnixNano()
+		//Logger.Println("[processOldMessages] fetch cost: ", float64(t2-t1)/float64(1e6))
 		f.sendMessage(message)
 	}
 }
@@ -71,11 +71,11 @@ func (f *fetch) Fetch() {
 				conn := Config.Pool.Get()
 				defer conn.Close()
 
-				//				t1 := time.Now().UnixNano()
-				//				Logger.Println("[Fetch] fetch")
+				//t1 := time.Now().UnixNano()
+				//Logger.Println("[Fetch] fetch")
 				message, err := redis.String(conn.Do("brpoplpush", f.queue, f.inprogressQueue(), 1))
-				//				t2 := time.Now().UnixNano()
-				//				Logger.Println("[Fetch] fetch cost: ", float64(t2-t1)/float64(1e6))
+				//t2 := time.Now().UnixNano()
+				//Logger.Println("[Fetch] fetch cost: ", float64(t2-t1)/float64(1e6))
 				if err != nil {
 					// If redis returns null, the queue is empty. Just ignore the error.
 					if err.Error() != "redigo: nil returned" {
